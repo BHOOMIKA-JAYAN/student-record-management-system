@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Record Management System</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide icons for minimalist look -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Simple Header -->
+    <header class="bg-white border-b border-slate-200 py-6">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center sm:text-left flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <h1 class="text-3xl font-extrabold text-teal-600 tracking-tight">StudentHub</h1>
+                <p class="text-sm text-slate-500 font-semibold uppercase tracking-wider mt-1">Apex College of Professional Studies</p>
+            </div>
+            <div class="mt-4 sm:mt-0 flex items-center justify-center space-x-2 bg-teal-50 border border-teal-200 px-4 py-2 rounded-xl text-teal-800 font-bold text-xs">
+                <span class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
+                <span>Active Database Session</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Workspace -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
+        
+        <!-- Live Alert Toast Notification -->
+        <div id="alert-toast" class="hidden bg-teal-600 text-white p-4 rounded-xl shadow-lg flex items-center justify-between transition-all duration-300">
+            <span id="toast-message" class="text-sm font-semibold">Action executed successfully!</span>
+            <button onclick="hideToast()" class="text-white hover:text-teal-200">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <!-- Search Section -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+            <label class="block text-sm font-bold text-slate-700 mb-2">Search Student Records</label>
+            <div class="relative">
+                <input type="text" id="main-search" oninput="filterAndRenderTable()" placeholder="Search by Student Name or Roll Number..." class="w-full text-sm border border-slate-200 pl-11 pr-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-slate-50">
+                <i data-lucide="search" class="w-5 h-5 text-slate-400 absolute left-3.5 top-3.5"></i>
+            </div>
+        </div>
+
+        <!-- The 3 Action Boxes Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- BOX 1: ADD STUDENT -->
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-teal-700 flex items-center space-x-2 border-b border-slate-100 pb-3 mb-4">
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                        <span>Add Student</span>
+                    </h2>
+                    
+                    <form id="add-form" onsubmit="addStudent(event)" class="space-y-3.5">
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Roll Number *</label>
+                            <input type="text" id="add-roll" required placeholder="e.g. 2021" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500 bg-slate-55">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Student Name *</label>
+                            <input type="text" id="add-name" required placeholder="e.g. Rahul Sen" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Class / Professional Course *</label>
+                            <select id="add-class" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                <option value="MBA">MBA (Master of Business Admin)</option>
+                                <option value="MCA" selected>MCA (Master of Computer Appl)</option>
+                                <option value="BTech">BTech (Bachelor of Tech)</option>
+                                <option value="BBA">BBA (Bachelor of Business Admin)</option>
+                                <option value="MTech">MTech (Master of Tech)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Subjects (Comma separated)</label>
+                            <input type="text" id="add-subjects" placeholder="e.g. Python, DBMS, OS" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Internal Marks (Max 50)</label>
+                                <input type="number" id="add-internal" min="0" max="50" placeholder="e.g. 42" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Overall % *</label>
+                                <input type="number" step="0.1" id="add-percentage" min="0" max="100" placeholder="e.g. 85.5" required class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 px-4 rounded-lg text-xs flex items-center justify-center space-x-2 transition-all shadow-md shadow-teal-100">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                            <span>Save Student Record</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- BOX 2: UPDATE STUDENT DETAILS -->
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-teal-700 flex items-center space-x-2 border-b border-slate-100 pb-3 mb-4">
+                        <i data-lucide="edit" class="w-5 h-5"></i>
+                        <span>Update Student details</span>
+                    </h2>
+
+                    <div class="mb-4">
+                        <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Select Student Roll Number</label>
+                        <select id="update-selector" onchange="loadStudentToUpdate()" class="w-full text-xs border border-teal-200 rounded-lg px-3 py-2 bg-teal-50/50 text-teal-900 font-bold focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            <!-- Populated Dynamically -->
+                        </select>
+                    </div>
+
+                    <div id="update-form-container" class="hidden">
+                        <form onsubmit="updateStudentDetails(event)" class="space-y-3.5">
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Student Name *</label>
+                                <input type="text" id="update-name" required class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Class / Course *</label>
+                                <select id="update-class" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    <option value="MBA">MBA (Master of Business Admin)</option>
+                                    <option value="MCA">MCA (Master of Computer Appl)</option>
+                                    <option value="BTech">BTech (Bachelor of Tech)</option>
+                                    <option value="BBA">BBA (Bachelor of Business Admin)</option>
+                                    <option value="MTech">MTech (Master of Tech)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Subjects</label>
+                                <input type="text" id="update-subjects" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Internal Marks</label>
+                                    <input type="number" id="update-internal" min="0" max="50" class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Overall % *</label>
+                                    <input type="number" step="0.1" id="update-percentage" min="0" max="100" required class="w-full text-xs border border-slate-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full mt-4 bg-teal-600 hover:bg-teal-700 text-white font-bold py-2.5 px-4 rounded-lg text-xs flex items-center justify-center space-x-2 transition-all shadow-md shadow-teal-100">
+                                <i data-lucide="save" class="w-4 h-4"></i>
+                                <span>Save Changes</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <div id="update-placeholder" class="text-center py-16 text-slate-400 text-xs">
+                        <i data-lucide="info" class="w-8 h-8 mx-auto text-slate-300 mb-2"></i>
+                        Select a student from the dropdown list above to modify their records.
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOX 3: DELETE STUDENT RECORD -->
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <div>
+                    <h2 class="text-lg font-bold text-red-700 flex items-center space-x-2 border-b border-slate-100 pb-3 mb-4">
+                        <i data-lucide="trash-2" class="w-5 h-5"></i>
+                        <span>Delete Student record</span>
+                    </h2>
+
+                    <div class="space-y-4">
+                        <p class="text-xs text-slate-500 leading-relaxed">
+                            To securely remove a student file, choose their roll number. Deleted files cannot be recovered.
+                        </p>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Choose Roll Number</label>
+                            <select id="delete-selector" class="w-full text-xs border border-red-200 rounded-lg px-3 py-2 bg-red-50/50 text-red-900 font-bold focus:outline-none focus:ring-2 focus:ring-red-500">
+                                <!-- Populated Dynamically -->
+                            </select>
+                        </div>
+
+                        <button onclick="deleteStudent()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-lg text-xs flex items-center justify-center space-x-2 transition-all shadow-md shadow-red-100">
+                            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                            <span>Permanently Erase</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Live Table Database Directory -->
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-slate-100 mb-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800">Student Directory View</h2>
+                    <p class="text-xs text-slate-400">Total database directory elements filtered live.</p>
+                </div>
+                <div class="mt-2 sm:mt-0 text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+                    Students Enrolled: <span id="student-count" class="text-teal-600">0</span>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-left border-collapse">
+                    <thead>
+                        <tr class="text-slate-400 text-xs font-bold uppercase tracking-wider bg-slate-50/50">
+                            <th class="py-3 px-4 rounded-l-lg border-b border-slate-100">Roll No</th>
+                            <th class="py-3 px-4 border-b border-slate-100">Name</th>
+                            <th class="py-3 px-4 border-b border-slate-100">Class</th>
+                            <th class="py-3 px-4 border-b border-slate-100">Subjects</th>
+                            <th class="py-3 px-4 border-b border-slate-100 text-center">Internal Marks</th>
+                            <th class="py-3 px-4 text-right rounded-r-lg border-b border-slate-100">Overall %</th>
+                        </tr>
+                    </thead>
+                    <tbody id="directory-body" class="divide-y divide-slate-100 text-sm font-medium">
+                        <!-- Dynamic Records -->
+                    </tbody>
+                </table>
+                <div id="no-search-results" class="hidden text-center py-12 text-slate-400 text-sm">
+                    <i data-lucide="user-x" class="w-10 h-10 mx-auto text-slate-300 mb-2"></i>
+                    No matches found for your search term.
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Simple Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs text-slate-400 font-bold">
+            <p>StudentHub Desk Studio v1.2 &bull; Term Mini-Project 2026</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC ENGINE -->
+    <script>
+        // System Mock Memory Database (Professional Courses)
+        let students = [
+            { roll: "2001", name: "Amit Sharma", class: "MBA", subjects: "Marketing, Finance, Accounting", internal: 42, percentage: 88.5 },
+            { roll: "2002", name: "Priya Das", class: "MCA", subjects: "Java programming, DBMS, OS", internal: 45, percentage: 92.0 },
+            { roll: "2003", name: "Karan Singh", class: "BTech", subjects: "Data Structures, Web Tech, Digital Logic", internal: 38, percentage: 79.4 },
+            { roll: "2004", name: "Riya Sen", class: "MBA", subjects: "Human Resources, Operations", internal: 40, percentage: 84.1 },
+            { roll: "2005", name: "Suresh Pillai", class: "MCA", subjects: "Python, Software Engineering, Networks", internal: 41, percentage: 81.6 }
+        ];
+
+        // System Startup Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            refreshUI();
+            lucide.createIcons();
+        });
+
+        // REFRESH CORE COMPONENTS
+        function refreshUI() {
+            filterAndRenderTable();
+            populateDropdowns();
+        }
+
+        // FILTER AND RENDER TABLE DIRECTORY
+        function filterAndRenderTable() {
+            const tbody = document.getElementById('directory-body');
+            const query = document.getElementById('main-search').value.toLowerCase().trim();
+            tbody.innerHTML = '';
+
+            const filtered = students.filter(s => 
+                s.name.toLowerCase().includes(query) || 
+                s.roll.toLowerCase().includes(query)
+            );
+
+            document.getElementById('student-count').innerText = students.length;
+
+            if (filtered.length === 0) {
+                document.getElementById('no-search-results').classList.remove('hidden');
+                return;
+            } else {
+                document.getElementById('no-search-results').classList.add('hidden');
+            }
+
+            filtered.forEach(s => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-teal-50/30 transition-all text-slate-700 text-xs sm:text-sm";
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-bold text-teal-800">${escapeHTML(s.roll)}</td>
+                    <td class="py-3 px-4 font-bold">${escapeHTML(s.name)}</td>
+                    <td class="py-3 px-4"><span class="px-2 py-0.5 border border-teal-200 text-teal-800 bg-teal-50 rounded-lg text-xs font-semibold">${s.class}</span></td>
+                    <td class="py-3 px-4 text-slate-500 font-normal truncate max-w-xs" title="${escapeHTML(s.subjects)}">${s.subjects ? escapeHTML(s.subjects) : '<span class="text-slate-300">None</span>'}</td>
+                    <td class="py-3 px-4 text-center font-mono">${s.internal !== undefined && s.internal !== '' ? s.internal : '-'}</td>
+                    <td class="py-3 px-4 text-right font-bold text-teal-600 font-mono">${parseFloat(s.percentage).toFixed(1)}%</td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        // POPULATE ACTION DROPDOWNS
+        function populateDropdowns() {
+            const updateSel = document.getElementById('update-selector');
+            const deleteSel = document.getElementById('delete-selector');
+
+            updateSel.innerHTML = '<option value="" disabled selected>-- Choose Student --</option>';
+            deleteSel.innerHTML = '<option value="" disabled selected>-- Choose Student --</option>';
+
+            if (students.length === 0) {
+                return;
+            }
+
+            students.forEach(s => {
+                const opt1 = document.createElement('option');
+                opt1.value = s.roll;
+                opt1.innerText = `${s.name} (Roll: ${s.roll})`;
+                updateSel.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = s.roll;
+                opt2.innerText = `${s.name} (Roll: ${s.roll})`;
+                deleteSel.appendChild(opt2);
+            });
+        }
+
+        // ADD NEW STUDENT
+        function addStudent(event) {
+            event.preventDefault();
+
+            const roll = document.getElementById('add-roll').value.trim();
+            const name = document.getElementById('add-name').value.trim();
+            const course = document.getElementById('add-class').value;
+            const subjects = document.getElementById('add-subjects').value.trim();
+            const internalVal = document.getElementById('add-internal').value;
+            const percentage = parseFloat(document.getElementById('add-percentage').value);
+
+            // Roll Number uniqueness validation
+            if (students.some(s => s.roll === roll)) {
+                showToast(`Error: Roll Number ${roll} is already registered!`);
+                return;
+            }
+
+            const newStudent = {
+                roll,
+                name,
+                class: course,
+                subjects,
+                internal: internalVal !== '' ? parseInt(internalVal) : '',
+                percentage
+            };
+
+            students.push(newStudent);
+
+            // Reset form fields
+            document.getElementById('add-form').reset();
+
+            refreshUI();
+            showToast(`Registered student "${name}" successfully.`);
+        }
+
+        // LOAD SELECT STUDENT DATA TO EDIT
+        function loadStudentToUpdate() {
+            const roll = document.getElementById('update-selector').value;
+            const student = students.find(s => s.roll === roll);
+
+            if (!student) return;
+
+            document.getElementById('update-placeholder').classList.add('hidden');
+            document.getElementById('update-form-container').classList.remove('hidden');
+
+            document.getElementById('update-name').value = student.name;
+            document.getElementById('update-class').value = student.class;
+            document.getElementById('update-subjects').value = student.subjects || '';
+            document.getElementById('update-internal').value = student.internal || '';
+            document.getElementById('update-percentage').value = student.percentage;
+        }
+
+        // SAVE UPDATED STUDENT DETAILS
+        function updateStudentDetails(event) {
+            event.preventDefault();
+
+            const roll = document.getElementById('update-selector').value;
+            const index = students.findIndex(s => s.roll === roll);
+
+            if (index === -1) {
+                showToast("Error: Student record mismatch.");
+                return;
+            }
+
+            const updatedName = document.getElementById('update-name').value.trim();
+            const updatedClass = document.getElementById('update-class').value;
+            const updatedSubjects = document.getElementById('update-subjects').value.trim();
+            const updatedInternal = document.getElementById('update-internal').value;
+            const updatedPercentage = parseFloat(document.getElementById('update-percentage').value);
+
+            students[index] = {
+                roll,
+                name: updatedName,
+                class: updatedClass,
+                subjects: updatedSubjects,
+                internal: updatedInternal !== '' ? parseInt(updatedInternal) : '',
+                percentage: updatedPercentage
+            };
+
+            // Reset view placeholder
+            document.getElementById('update-form-container').classList.add('hidden');
+            document.getElementById('update-placeholder').classList.remove('hidden');
+
+            refreshUI();
+            showToast(`Updated record for "${updatedName}" successfully.`);
+        }
+
+        // DELETE STUDENT RECORD
+        function deleteStudent() {
+            const roll = document.getElementById('delete-selector').value;
+            if (!roll) {
+                showToast("Please choose a valid Roll Number to erase.");
+                return;
+            }
+
+            const student = students.find(s => s.roll === roll);
+            if (!student) return;
+
+            const confirmErase = confirm(`Confirm Deletion:\nAre you sure you want to completely delete "${student.name}" (Roll No: ${student.roll})?`);
+            if (confirmErase) {
+                students = students.filter(s => s.roll !== roll);
+                
+                // Hide active update views if editing student was deleted
+                document.getElementById('update-form-container').classList.add('hidden');
+                document.getElementById('update-placeholder').classList.remove('hidden');
+
+                refreshUI();
+                showToast(`Erase successful: Deleted student ${student.name}.`);
+            }
+        }
+
+        // ALERT TOAST CONTROLLER
+        function showToast(msg) {
+            const toast = document.getElementById('alert-toast');
+            const text = document.getElementById('toast-message');
+            text.innerText = msg;
+            toast.classList.remove('hidden');
+
+            setTimeout(() => {
+                hideToast();
+            }, 4500);
+        }
+
+        function hideToast() {
+            document.getElementById('alert-toast').classList.add('hidden');
+        }
+
+        // HTML ESCAPE SECURITY FOR INPUTS
+        function escapeHTML(str) {
+            if (!str) return '';
+            return str.toString().replace(/[&<>'"]/g, 
+                tag => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[tag] || tag)
+            );
+        }
+    </script>
+</body>
+</html>
