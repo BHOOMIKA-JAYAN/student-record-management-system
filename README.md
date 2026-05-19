@@ -5,6 +5,8 @@ A simple Student Record Management System built with Python to manage student de
 
 
 Features
+
+
 Add new student records
 View all student records
 Search student by ID
@@ -15,6 +17,7 @@ Simple command-line interface
 
 
 Technologies Used
+
 Python 3
 File Handling / SQLite (depending on your project)
 VS Code / PyCharm
